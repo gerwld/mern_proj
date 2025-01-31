@@ -48,17 +48,19 @@ const createNewUsers = asyncHandler(async (req, res) => {
 // @route PATCH /users
 // @access Private
 const updateUser = asyncHandler(async (req, res) => {
-    const {id, username, roles, active, password} = req.body.Array
+    const {id, username, roles, active, password} = req.body
+    
     
     //Confirm data
-    if(!id || !username || !Array.isArray(roles) || !roles.lendth || typeof active !== 'boolean') {
+    if(!id || !username || !Array.isArray(roles) || !roles.length || typeof active !== 'boolean') {        
         return res.status(400).json({message: "All fields are required"})
     }
 
     // Check if exist
     const user = await User.findById(id).exec();
     if(!user) {
-        return res.status(400).json({message: "User not fould"})
+        console.log(user);
+        return res.status(400).json({message: "User not found"})
     }
 
     // Check for duplicate
@@ -93,8 +95,8 @@ const deleteUser = asyncHandler(async (req, res) => {
     }
 
     // Check if assigned notes for userID exist
-    const notes = await Note.findOne({user: id}).lean().exec();
-    if(notes?.length) {
+    const note = await Note.findOne({user: id}).lean().exec();
+    if(note) {
         return res.status(400).json({message: "User has assigned notes"});
     }
 
@@ -105,7 +107,7 @@ const deleteUser = asyncHandler(async (req, res) => {
         return res.status(400).json({message: "User not found"})
     }
 
-    const result = await user.deleteOne();
+    const result = await User.findOneAndDelete({ _id: user._id });
     const reply = `Username ${result.username} with id ${result.id} deleted`
     res.json(reply)
 })
