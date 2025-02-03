@@ -1,25 +1,28 @@
-import { createEntityAdapter, createSelector } from "@reduxjs/toolkit";
-import { apiSlice } from "../../app/api/apiSlice";
+import {
+    createSelector,
+    createEntityAdapter
+} from "@reduxjs/toolkit";
+import { apiSlice } from "../../app/api/apiSlice"
 
+const notesAdapter = createEntityAdapter({
+    sortComparer: (a, b) => (a.completed === b.completed) ? 0 : a.completed ? 1 : -1
+})
 
-
-const notesAdapter = createEntityAdapter();
-
-const initialState = notesAdapter.getInitialState();
-
+const initialState = notesAdapter.getInitialState()
 
 export const notesApiSlice = apiSlice.injectEndpoints({
     endpoints: builder => ({
         getNotes: builder.query({
-            query: () => '/notes',
-            validateStatus: (response, result) => {
-                return response.status === 200 && !result.isError
-            },
-            keepUnusedDataFor: 5,
+            query: () => ({
+                url: '/notes',
+                validateStatus: (response, result) => {
+                    return response.status === 200 && !result.isError
+                },
+            }),
             transformResponse: responseData => {
-                const loadedNotes = responseData.map(user => {
-                    user.id = user._id
-                    return user
+                const loadedNotes = responseData.map(note => {
+                    note.id = note._id
+                    return note
                 });
                 return notesAdapter.setAll(initialState, loadedNotes)
             },
@@ -32,11 +35,48 @@ export const notesApiSlice = apiSlice.injectEndpoints({
                 } else return [{ type: 'Note', id: 'LIST' }]
             }
         }),
+        addNewNote: builder.mutation({
+            query: initialNote => ({
+                url: '/notes',
+                method: 'POST',
+                body: {
+                    ...initialNote,
+                }
+            }),
+            invalidatesTags: [
+                { type: 'Note', id: "LIST" }
+            ]
+        }),
+        updateNote: builder.mutation({
+            query: initialNote => ({
+                url: '/notes',
+                method: 'PATCH',
+                body: {
+                    ...initialNote,
+                }
+            }),
+            invalidatesTags: (result, error, arg) => [
+                { type: 'Note', id: arg.id }
+            ]
+        }),
+        deleteNote: builder.mutation({
+            query: ({ id }) => ({
+                url: `/notes`,
+                method: 'DELETE',
+                body: { id }
+            }),
+            invalidatesTags: (result, error, arg) => [
+                { type: 'Note', id: arg.id }
+            ]
+        }),
     }),
 })
 
 export const {
     useGetNotesQuery,
+    useAddNewNoteMutation,
+    useUpdateNoteMutation,
+    useDeleteNoteMutation,
 } = notesApiSlice
 
 // returns the query result object
