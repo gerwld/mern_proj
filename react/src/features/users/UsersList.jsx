@@ -1,6 +1,6 @@
 import React from 'react'
 import { useGetUsersQuery } from './usersApi'
-
+import User from "./User";
 
 
 const UsersList = () => {

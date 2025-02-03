@@ -5,7 +5,7 @@ import { apiSlice } from "../../app/api/apiSlice";
 
 const usersAdapter = createEntityAdapter();
 
-const initializeState = usersAdapter.getInitialState();
+const initialState = usersAdapter.getInitialState();
 
 
 export const usersApiSlice = apiSlice.injectEndpoints({
