@@ -1,4 +1,4 @@
-import { createEntityAdapter } from "@reduxjs/toolkit";
+import { createEntityAdapter, createSelector } from "@reduxjs/toolkit";
 import { apiSlice } from "../../app/api/apiSlice";
 
 
@@ -26,10 +26,10 @@ export const notesApiSlice = apiSlice.injectEndpoints({
             providesTags: (result, error, arg) => {
                 if (result?.ids) {
                     return [
-                        { type: 'User', id: 'LIST' },
-                        ...result.ids.map(id => ({ type: 'User', id }))
+                        { type: 'Note', id: 'LIST' },
+                        ...result.ids.map(id => ({ type: 'Note', id }))
                     ]
-                } else return [{ type: 'User', id: 'LIST' }]
+                } else return [{ type: 'Note', id: 'LIST' }]
             }
         }),
     }),
@@ -51,7 +51,7 @@ const selectNotesData = createSelector(
 //getSelectors creates these selectors and we rename them with aliases using destructuring
 export const {
     selectAll: selectAllNotes,
-    selectById: selectUserById,
-    selectIds: selectUserIds
+    selectById: selectNoteById,
+    selectIds: selectNoteIds
     // Pass in a selector that returns the notes slice of state
 } = notesAdapter.getSelectors(state => selectNotesData(state) ?? initialState)
